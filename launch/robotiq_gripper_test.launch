@@ -1,0 +1,12 @@
+<!-- ROS Demo  -->
+<launch>
+
+
+    <!-- Launch driver script - ensure robot is turned on-->
+    <node name="gripper_launcher" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" respawn="false" output="screen" args="/dev/ttyUSB1"></node>
+
+
+<!-- Launch gripper script - ensure robot is turned on-->
+    <node name="gripper_controller" pkg="ur5_control" type="ur5_move_gripper" respawn="false" output="screen"></node>
+
+</launch>

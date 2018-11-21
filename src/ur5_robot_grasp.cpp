@@ -51,6 +51,17 @@ ros::Publisher pub_to_gripper;
 void Gripper_move(){
 
   robotiq_2f_gripper_control::Robotiq2FGripper_robot_output Grip;
+
+  Grip.rACT = 0;
+  Grip.rPR = 0;
+  Grip.rGTO = 0;
+  Grip.rSP  = 0;
+  Grip.rFR = 0;
+  Grip.rATR =0;
+
+  pub_to_gripper.publish(Grip);
+  sleep(2);
+
   Grip.rACT = 1;
   Grip.rPR = 0;
   Grip.rGTO = 1;
@@ -66,10 +77,10 @@ void Gripper_move(){
   Grip.rPR = 255;
   pub_to_gripper.publish(Grip);
 
-  sleep(1);
+  sleep(2);
   Grip.rPR = 0;
   pub_to_gripper.publish(Grip);
-  sleep(1);
+  sleep(2);
   }
 
 }
