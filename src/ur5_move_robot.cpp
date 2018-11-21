@@ -46,7 +46,6 @@
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
 
-
 int main(int argc, char** argv)
 {
 
@@ -63,71 +62,27 @@ int main(int argc, char** argv)
 		// We will use the :planning_scene_interface:`PlanningSceneInterface`
 		// class to add and remove collision objects in our "virtual world" scene
 		moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-
+ 		moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 		// Raw pointers are frequently used to refer to the planning group for improved performance.
 		const robot_state::JointModelGroup* joint_model_group =
 			move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
 
-		// Visualization
-		// ^^^^^^^^^^^^^
-		//
-		// The package MoveItVisualTools provides many capabilties for visualizing objects, robots,
-		// and trajectories in RViz as well as debugging tools such as step-by-step introspection of a script
-		namespace rvt = rviz_visual_tools;
-		moveit_visual_tools::MoveItVisualTools visual_tools("manipulator");
-		visual_tools.deleteAllMarkers();
+		 move_group.setStartStateToCurrentState();
 
-		// Getting Basic Information
-		// ^^^^^^^^^^^^^^^^^^^^^^^^^
-		//
-		// We can print the name of the reference frame for this robot.
-		ROS_INFO_NAMED("tutorial", "Reference frame: %s", move_group.getPlanningFrame().c_str());
+		geometry_msgs::Pose target_pose1 = move_group.getCurrentPose().pose;
+		target_pose1.position.z = 0.5;
+		target_pose1.position.y = 0;
+		target_pose1.position.x = -0.5;
 
-		// We can also print the name of the end-effector link for this group.
-		ROS_INFO_NAMED("tutorial", "End effector link: %s", move_group.getEndEffectorLink().c_str());
+		 		ROS_INFO_NAMED("tutorial", "Current Pose After move x:%f y:%f z:%f", target_pose1.position.x, target_pose1.position.y, target_pose1.position.z );
 
-		// Start the demo
-		// ^^^^^^^^^^^^^^^^^^^^^^^^^
-		//visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to start the demo");
+	 	move_group.setPoseTarget(target_pose1);
 
-		// Planning to a Pose goal
-		// ^^^^^^^^^^^^^^^^^^^^^^^
-		// We can plan a motion for this group to a desired pose for the
-		// end-effector.
-		geometry_msgs::Pose target_pose1;
-		target_pose1.orientation = tf::createQuaternionMsgFromRollPitchYaw(0.0, 0.0, 0.0);
-		target_pose1.position.x = 0.10;
-		target_pose1.position.y = 0.25;
-		target_pose1.position.z = 0.50;
-		move_group.setPoseTarget(target_pose1);
-
-		moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-
-		bool success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-
-		ROS_INFO_NAMED("tutorial", "Visualizing plan 1 (pose goal) %s", success ? "success" : "FAILED");
+		move_group.plan(my_plan);
 
 		move_group.move();
-
-		sleep(2.0);
-
-		target_pose1.position.x = 0.20;
-		target_pose1.position.y = 0.35;
-		target_pose1.position.z = 0.40;
-		move_group.setPoseTarget(target_pose1);
-
-		moveit::planning_interface::MoveGroupInterface::Plan my_plan2;
-
-		success = (move_group.plan(my_plan2) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-
-		ROS_INFO_NAMED("tutorial", "Visualizing plan 2 (pose goal) %s", success ? "success" : "FAILED");
-
-		move_group.move();
-
 
 	ros::shutdown();
 
 	return 0;
-
-	
 }

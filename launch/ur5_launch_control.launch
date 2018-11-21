@@ -1,8 +1,8 @@
 <!-- ROS Demo UR5_Control -->
 <launch>
   <!-- If sim=false, then robot_ip is required -->
-    <arg name="sim" default="true" />
-    <arg name="robot_ip" unless="$(arg sim)" />
+    <arg name="sim" default="false" />
+    <arg name="robot_ip" unless="$(arg sim)"  default ="10.0.0.99"/>
     <!-- By default, we are not in debug mode -->
     <arg name="debug" default="false" />
 
@@ -26,31 +26,17 @@
 
     <!-- If using real robot, initialise connection to the real robot -->
     <group unless="$(arg sim)">
-      <include file="$(find ur_bringup)/launch/ur5_bringup.launch">
+      <include file="$(find ur_modern_driver)/launch/ur5_bringup.launch">
         <arg name="robot_ip" value="$(arg robot_ip)" />
       </include>
     </group>
 
-    <!-- Given the published joint states, publish tf for the robot links -->
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
 
     <!-- Launch the move group for motion planning -->
-    <group if="$(arg sim)">
-        <include file="$(find ur5_moveit_config)/launch/move_group.launch">
-            <arg name="limited" value="$(arg limited)" />
-            <arg name="allow_trajectory_execution" value="true"/>  
-            <arg name="fake_execution" value="true"/>
-            <arg name="info" value="true"/>
-            <arg name="debug" value="$(arg debug)"/>
-        </include>
-    </group>
-
-    <group unless="$(arg sim)">
-        <include file="$(find ur5_moveit_config)/launch/move_group.launch">
+        <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
             <arg name="limited" default="true" />
-            <arg name="publish_monitored_planning_scene" value="true" />
         </include>
-    </group>
+
 
     <!-- Launch the RViz visualizer -->
     <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
@@ -60,4 +46,5 @@
 
     <!-- Launch our own script -->
     <node name="ur5_move_robot" pkg="ur5_control" type="ur5_move_robot" respawn="false" output="screen"></node>
+
 </launch>
