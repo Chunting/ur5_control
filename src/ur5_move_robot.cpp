@@ -63,7 +63,35 @@ int main(int argc, char** argv)
 		// class to add and remove collision objects in our "virtual world" scene
 		moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
  		moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-		// Raw pointers are frequently used to refer to the planning group for improved performance.
+		
+		//add test collision box
+		moveit_msgs::CollisionObject collision_object;
+		collision_object.header.frame_id = move_group.getPlanningFrame();
+		collision_object.id = "box1";
+		//specify box size
+		shape_msgs::SolidPrimitive primitive;
+		primitive.type = primitive.BOX;
+		primitive.dimensions.resize(3);
+		primitive.dimensions[0] = 1;
+		primitive.dimensions[1] = 1;
+		primitive.dimensions[2] = 0.1;
+		//specify box position/orientation
+		geometry_msgs::Pose box_pose;
+		box_pose.orientation.w = 1.0;
+		box_pose.position.x = 0;
+		box_pose.position.y = 0;
+		box_pose.position.z = 0;
+		//add box to collision object
+		collision_object.primitives.push_back(primitive);
+		collision_object.primitive_poses.push_back(box_pose);
+		collision_object.operation = collision_object.ADD;
+		//add box collision object to vector of Collision Objects
+		std::vector<moveit_msgs::CollisionObject> collision_objects;
+		collision_objects.push_back(collision_object);
+		//add vector of collision bjects to the "world"
+		planning_scene_interface.addCollisionObjects(collision_objects);
+
+
 		const robot_state::JointModelGroup* joint_model_group =
 			move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
 
