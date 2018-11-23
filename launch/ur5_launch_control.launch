@@ -32,15 +32,18 @@
     </group>
 
 
-    <!-- Launch the move group for motion planning -->
+     <!-- Launch the move group for motion planning -->
         <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
             <arg name="limited" default="true" />
         </include>
 
+    <!-- Launch the Kinect segmentor -->
+        <include file="$(find kinect_segmentation)/launch/segmentation.launch">
+        </include>
 
     <!-- Launch the RViz visualizer -->
     <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
-        <arg name="config" value="true" />
+	<arg name="config" value="true" />
     </include>
 
 

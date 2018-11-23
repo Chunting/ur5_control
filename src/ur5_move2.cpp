@@ -46,10 +46,15 @@
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
 
-void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
-    std::cout << "MOVE!" << std::endl;
+int main(int argc, char** argv)
+{
 
-		geometry_msgs::Point Centroid_XYZ = *Centroid; 
+	ros::init(argc, argv, "move_robot");
+
+	ros::NodeHandle node_handle;
+	ros::AsyncSpinner spinner(1);
+	spinner.start();
+
 		static const std::string PLANNING_GROUP = "manipulator";
         moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
 
@@ -104,9 +109,9 @@ void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
 		geometry_msgs::Pose target_pose1 = move_group.getCurrentPose().pose;
 		//target_pose1.orientation.x = 0;
 		
-		target_pose1.position.z = Centroid_XYZ.z + 0.25;
-		target_pose1.position.y = Centroid_XYZ.y;
-		target_pose1.position.x = Centroid_XYZ.x;
+		target_pose1.position.z = 0.3 ;
+		target_pose1.position.y = 0.1;
+		target_pose1.position.x = -0.5;
 		
 
 		ROS_INFO_NAMED("tutorial", "Current Pose After move x:%f y:%f z:%f w:%f", move_group.getCurrentPose().pose.position.x, move_group.getCurrentPose().pose.position.y, move_group.getCurrentPose().pose.position.z, move_group.getCurrentPose().pose.orientation.w );
@@ -114,11 +119,13 @@ void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
 	 	move_group.setPoseTarget(target_pose1);
 
 		move_group.plan(my_plan);
-		//visual_tools.publishText(text_pose, "Add object", rvt::WHITE, rvt::XLARGE);
-  		//visual_tools.trigger();
-  		// Wait for MoveGroup to recieve and process the collision object message
-		//visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to move to position");
 
+		visual_tools.publishText(text_pose, "Add object", rvt::WHITE, rvt::XLARGE);
+  		visual_tools.trigger();
+
+  		// Wait for MoveGroup to recieve and process the collision object message
+		visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to move to position");
+		sleep(2);
 		move_group.move();
 
 		target_pose1.position.z -= 0.1;
@@ -129,28 +136,19 @@ void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
 
 		//back to home
 		target_pose1.position.z = 0.6;
-		target_pose1.position.y = 0.1;
+		target_pose1.position.y = 0.4;
 		target_pose1.position.x = -0.5;
 
 	 	move_group.setPoseTarget(target_pose1);
 
 		move_group.plan(my_plan);
-		
+		visual_tools.publishText(text_pose, "Add object", rvt::WHITE, rvt::XLARGE);
+  		visual_tools.trigger();
+		visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to move back");
+
 		move_group.move();
-}
 
+	ros::shutdown();
 
-int main(int argc, char** argv)
-{
-	sleep(10);
-	std::cout << "INIT" << std::endl;
-	ros::init(argc, argv, "move_robot");
-	ros::NodeHandle node_handle;
-	ros::Subscriber sub = node_handle.subscribe ("output_point", 1, &Move_ur5);
-
-   	ros::AsyncSpinner spinner(2);
-	spinner.start();
-	  ros::waitForShutdown();
-  return 0; 
-
+	return 0;
 }
