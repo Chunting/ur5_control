@@ -1,38 +1,8 @@
-/*********************************************************************
- * Software License Agreement (BSD License)
- *
- *  Copyright (c) 2013, SRI International
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
- *   * Neither the name of SRI International nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************/
 
-/* Author: Sachin Chitta, Dave Coleman, Mike Lautman */
+// ROS
+#include <ros/ros.h>
+#include <iostream>
+
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
@@ -45,6 +15,50 @@
 
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
+#include <robotiq_2f_gripper_control/Robotiq2FGripper_robot_output.h>
+#include <std_msgs/Float32.h>
+
+ros::Publisher pub_to_gripper;
+
+
+void OpenGripper(){
+  robotiq_2f_gripper_control::Robotiq2FGripper_robot_output Grip;
+
+  Grip.rACT = 1;
+  Grip.rPR = 0;
+  Grip.rGTO = 1;
+  Grip.rSP  = 255;
+  Grip.rFR = 150;
+  Grip.rATR =0;
+
+  pub_to_gripper.publish(Grip);
+}
+
+void CloseGripper(){
+  robotiq_2f_gripper_control::Robotiq2FGripper_robot_output Grip;
+
+  Grip.rACT = 1;
+  Grip.rPR = 255;
+  Grip.rGTO = 1;
+  Grip.rSP  = 255;
+  Grip.rFR = 150;
+  Grip.rATR =0;  
+  pub_to_gripper.publish(Grip);
+}
+
+void InitGripper(){
+
+  robotiq_2f_gripper_control::Robotiq2FGripper_robot_output Grip;
+
+  Grip.rACT = 1;
+  Grip.rPR = 0;
+  Grip.rGTO = 1;
+  Grip.rSP  = 255;
+  Grip.rFR = 150;
+  Grip.rATR =0;
+
+  pub_to_gripper.publish(Grip);
+}
 
 void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
     std::cout << "MOVE!" << std::endl;
@@ -104,6 +118,9 @@ void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
 		geometry_msgs::Pose target_pose1 = move_group.getCurrentPose().pose;
 		//target_pose1.orientation.x = 0;
 		
+		OpenGripper();
+		sleep(2);
+
 		target_pose1.position.z = Centroid_XYZ.z + 0.25;
 		target_pose1.position.y = Centroid_XYZ.y;
 		target_pose1.position.x = Centroid_XYZ.x;
@@ -113,19 +130,16 @@ void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
 
 	 	move_group.setPoseTarget(target_pose1);
 
-		move_group.plan(my_plan);
-		//visual_tools.publishText(text_pose, "Add object", rvt::WHITE, rvt::XLARGE);
-  		//visual_tools.trigger();
-  		// Wait for MoveGroup to recieve and process the collision object message
-		//visual_tools.prompt("Press 'next' in the RvizVisualToolsGui window to move to position");
-
 		move_group.move();
 
 		target_pose1.position.z -= 0.1;
 
+
 	 	move_group.setPoseTarget(target_pose1);		
 		move_group.move();
 
+		CloseGripper();
+		sleep(2);
 
 		//back to home
 		target_pose1.position.z = 0.6;
@@ -135,8 +149,11 @@ void Move_ur5(const geometry_msgs::PointConstPtr& Centroid){
 	 	move_group.setPoseTarget(target_pose1);
 
 		move_group.plan(my_plan);
-		
+
 		move_group.move();
+
+		OpenGripper();
+		sleep(2);
 }
 
 
@@ -147,7 +164,8 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "move_robot");
 	ros::NodeHandle node_handle;
 	ros::Subscriber sub = node_handle.subscribe ("output_point", 1, &Move_ur5);
-
+	pub_to_gripper = node_handle.advertise<robotiq_2f_gripper_control::Robotiq2FGripper_robot_output> ("Robotiq2FGripperRobotOutput", 1);
+	InitGripper();
    	ros::AsyncSpinner spinner(2);
 	spinner.start();
 	  ros::waitForShutdown();

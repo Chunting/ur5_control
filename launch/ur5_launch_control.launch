@@ -47,6 +47,10 @@
     </include>
 
 
+    <!-- Launch Gripper driver script - ensure robot is turned on-->
+    <node name="gripper_launcher" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" respawn="false" output="screen" args="/dev/ttyUSB1"></node>
+
+
     <!-- Launch our own script -->
     <node name="ur5_move_robot" pkg="ur5_control" type="ur5_move_robot" respawn="false" output="screen"></node>
 

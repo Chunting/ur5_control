@@ -50,6 +50,7 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>joint_state_publisher</build_depend>
+  <build_depend>robotiq_2f_gripper_control</build_depend>
   <build_depend>moveit_core</build_depend>
   <build_depend>moveit_msgs</build_depend>
   <build_depend>moveit_planners_ompl</build_depend>
@@ -79,7 +80,7 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ur_description</exec_depend>
   <exec_depend>xacro</exec_depend>
-
+  <exec_depend>robotiq_2f_gripper_control</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
